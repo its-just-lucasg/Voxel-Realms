@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>VoxelRealms — Mac Edition</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="game-container"></div>
+
+    <!-- Underwater & Vignette Overlays -->
+    <div id="underwater-overlay" class="hidden"></div>
+    <div id="vignette-overlay"></div>
+
+    <!-- Top-Left Debug & World HUD -->
+    <div id="hud-top-left">
+      <div class="hud-brand">VOXEL<span>REALMS</span></div>
+      <div id="hud-stats">
+        <div><span class="stat-label">FPS:</span> <span id="stat-fps">60</span></div>
+        <div><span class="stat-label">XYZ:</span> <span id="stat-pos">0, 0, 0</span></div>
+        <div><span class="stat-label">Biome:</span> <span id="stat-biome">Emerald Hills</span></div>
+        <div><span class="stat-label">Time:</span> <span id="stat-time">Day (12:00)</span></div>
+        <div><span class="stat-label">Mode:</span> <span id="stat-mode" class="badge-walk">WALKING</span></div>
+        <div><span class="stat-label">Rules:</span> <span id="stat-gamemode" class="badge-fly">CREATIVE</span></div>
+      </div>
+      <canvas id="minimap-canvas" width="96" height="96" style="margin-top:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.22);display:block;width:112px;height:112px;image-rendering:pixelated;"></canvas>
+    </div>
+
+    <!-- Top-Right Quick Controls Reminder -->
+    <div id="hud-top-right">
+      <div class="key-hint"><kbd>WASD</kbd> Move &bull; <kbd>Shift</kbd> Sprint</div>
+      <div class="key-hint"><kbd>Q</kbd> Cycle Weapon / Arcane Firestaff</div>
+      <div class="key-hint"><kbd>V</kbd> 3rd-Person &bull; <kbd>F</kbd> Fly (<kbd>Space</kbd>/<kbd>C</kbd>)</div>
+      <div class="key-hint"><kbd>B</kbd> Toggle Survival / Creative Mode</div>
+      <div class="key-hint"><kbd>L-Click</kbd> Mine/Attack &bull; <kbd>R-Click</kbd>/<kbd>;</kbd> Place/Use</div>
+      <div class="key-hint"><kbd>E</kbd> Inventory &bull; <kbd>T</kbd> Time &bull; <kbd>P</kbd> Weather</div>
+      <div class="key-hint"><kbd>G</kbd> Lantern &bull; <kbd>N</kbd> Music &bull; <kbd>M</kbd> Map &bull; <kbd>ESC</kbd> Menu</div>
+    </div>
+
+    <!-- Center Crosshair -->
+    <div id="crosshair">
+      <div class="ch-line ch-h"></div>
+      <div class="ch-line ch-v"></div>
+      <div class="ch-dot"></div>
+    </div>
+
+    <!-- Selected Block Name Toast -->
+    <div id="selected-block-label">Grass Block</div>
+
+    <!-- Bottom Hotbar -->
+    <div id="hotbar-container">
+      <div id="hotbar"></div>
+    </div>
+
+    <!-- Mobile / Touch Virtual Controls (Auto-shown on touch devices or toggleable) -->
+    <div id="touch-controls" class="hidden">
+      <div id="joystick-zone">
+        <div id="joystick-base">
+          <div id="joystick-stick"></div>
+        </div>
+      </div>
+      <div id="touch-action-buttons">
+        <button id="btn-touch-jump">JUMP</button>
+        <button id="btn-touch-fly">FLY</button>
+        <button id="btn-touch-mine">MINE</button>
+        <button id="btn-touch-place">PLACE</button>
+        <button id="btn-touch-inv">BLOCKS</button>
+      </div>
+    </div>
+
+    <!-- Block Inventory Modal (E Key) -->
+    <div id="inventory-modal" class="modal-backdrop hidden">
+      <div class="modal-panel inventory-panel">
+        <div class="modal-header">
+          <h2>Block Palette &amp; Materials</h2>
+          <span class="modal-subtitle">Click a block to assign it to your active hotbar slot (<kbd>E</kbd> or <kbd>ESC</kbd> to close)</span>
+        </div>
+        <div id="inventory-grid"></div>
+      </div>
+    </div>
+
+    <!-- Artisan Workbench Crafting Modal (Interact with Workbench or C Key) -->
+    <div id="crafting-modal" class="modal-backdrop hidden">
+      <div class="modal-panel inventory-panel">
+        <div class="modal-header">
+          <h2>Artisan Workbench &amp; Crafting</h2>
+          <span id="crafting-wood-status" class="modal-subtitle">Available Wood: 0</span>
+        </div>
+        <div id="crafting-recipes-list" style="display:flex;flex-direction:column;gap:10px;margin-top:12px;text-align:left;"></div>
+        <div style="margin-top:16px;">
+          <button id="btn-close-crafting" class="btn-secondary">Close Workbench (<kbd>ESC</kbd>)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pause / Start Overlay Modal -->
+    <div id="start-modal" class="modal-backdrop">
+      <div class="modal-panel start-panel">
+        <div class="logo-title">VOXEL<span>REALMS</span></div>
+        <p class="logo-tagline">High-Definition Procedural Voxel Engine &bull; Fantasy Edition</p>
+
+        <div class="feature-badges">
+          <span class="f-badge">Smooth Voxel AO</span>
+          <span class="f-badge">16x16 Crisp Pixel Art</span>
+          <span class="f-badge">Dynamic Sun &amp; Sky</span>
+          <span class="f-badge">Survival &amp; Crafting</span>
+        </div>
+
+        <div class="menu-actions">
+          <button id="btn-play" class="btn-primary">Click to Play World</button>
+          <div class="menu-row">
+            <button id="btn-toggle-gamemode" class="btn-secondary">Switch Mode: CREATIVE / SURVIVAL (B)</button>
+            <button id="btn-time-cycle" class="btn-secondary">Cycle Time (Dawn / Noon / Sunset / Night)</button>
+          </div>
+          <div class="menu-row">
+            <button id="btn-new-world" class="btn-secondary">Generate New World Seed</button>
+            <button id="btn-reset-edits" class="btn-secondary">Reset Saved Block Edits</button>
+            <button id="btn-toggle-touch" class="btn-secondary">Toggle Touch UI</button>
+          </div>
+        </div>
+
+        <div class="controls-grid">
+          <div><strong>Move:</strong> W, A, S, D</div>
+          <div><strong>Jump / Swim:</strong> Space</div>
+          <div><strong>Sprint:</strong> Shift</div>
+          <div><strong>Fly Mode:</strong> F (Space = Up, C = Down)</div>
+          <div><strong>Break Block:</strong> Left Click</div>
+          <div><strong>Place Block:</strong> Right Click or <kbd>;</kbd></div>
+          <div><strong>All Blocks:</strong> E (Block Palette)</div>
+          <div><strong>Hand Torch:</strong> G (Dynamic Light)</div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

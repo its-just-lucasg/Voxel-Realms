@@ -1,0 +1,17 @@
+# Dependencies & Build Output
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# OS & ExFAT / AppleDouble metadata files
+._*
+.DS_Store
+Thumbs.db
+
+# Logs & Editor directories
+*.log
+npm-debug.log*
+.vscode/*
+!.vscode/extensions.json
+.idea/
