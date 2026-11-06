@@ -1,0 +1,8 @@
+{
+  "name": "VoxelRealms",
+  "description": "High-definition procedural voxel engine and fantasy sandbox game with survival, crafting, dynamic sky, and smooth lighting.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
